@@ -113,7 +113,8 @@ Thông qua mạng lưới này, từ một node trung tâm (Bệnh), có thể d
 Dự án này là kết quả nghiên cứu của nhóm phát triển tại **Trường Đại học An Giang, Đại học Quốc gia Thành phố Hồ Chí Minh**.
 
 * **Tôn Thiện Tâm**
-* **PGS.TS Đoàn Thanh Nghị**
-* Cùng các cộng sự: Nguyễn Duy Khánh, Phan Minh Trung, Võ Ngọc Tường Vi.
+* Người hướng dẫn: **PGS.TS Đoàn Thanh Nghị**
+* Người liên hệ: **Nguyễn Duy Khánh**
+* Cùng các cộng sự: Phan Minh Trung, Võ Ngọc Tường Vi.
 
 **Tài trợ:** Nghiên cứu này được tài trợ bởi Ủy ban Nhân dân tỉnh Cà Mau, Sở Khoa học và Công nghệ tỉnh Cà Mau.

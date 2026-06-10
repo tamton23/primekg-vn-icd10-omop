@@ -81,7 +81,7 @@ Hệ thống định nghĩa chặt chẽ 8 loại quan hệ có hướng giữa 
 
 Dưới đây là một ví dụ minh họa khi trực quan hóa mã bệnh **A00.0 (Bệnh tả do Vibrio cholerae 01, típ sinh học cholerae)** cùng mạng lưới các thực thể lâm sàng bao quanh nó trên nền tảng Neo4j:
 
-![Trực quan hóa Đồ thị Neo4j - Bệnh Tả (A00.0)](image_d34f57.png)
+![Trực quan hóa Đồ thị Neo4j - Bệnh Tả (A00.0)](visualisation (2).png)
 
 Thông qua mạng lưới này, từ một node trung tâm (Bệnh), có thể dễ dàng truy xuất ngược - xuôi để tìm các tập hợp thuốc điều trị, triệu chứng lâm sàng đặc trưng hoặc chẩn đoán phân biệt với các bệnh có chung tập triệu chứng.
 

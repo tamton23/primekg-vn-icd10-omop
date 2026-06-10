@@ -77,11 +77,24 @@ Hệ thống định nghĩa chặt chẽ 8 loại quan hệ có hướng giữa 
 
 ## 🕸️ Trực quan hóa Đồ thị
 
-Định dạng xuất ra của PRIME-KG VN (các tệp `nodes.csv` và `edges.csv`) được cấu trúc hóa để có thể dễ dàng đọc hiểu bởi các thư viện phân tích đồ thị (NetworkX, igraph) hoặc nạp vào các hệ quản trị cơ sở dữ liệu đồ thị như **Neo4j** để truy vấn trực quan.
+Định dạng xuất ra của PRIME-KG VN (các tệp `nodes.csv` và `edges.csv`) được cấu trúc hóa để có thể dễ dàng nạp vào các hệ quản trị cơ sở dữ liệu đồ thị như **Neo4j**, hoặc phân tích bằng các thư viện Python (NetworkX, igraph). 
 
-Dưới đây là một ví dụ minh họa khi trực quan hóa mã bệnh **A00.0 (Bệnh tả do Vibrio cholerae 01, típ sinh học cholerae)** cùng mạng lưới các thực thể lâm sàng bao quanh nó trên nền tảng Neo4j:
+Dưới đây là các minh họa khi đưa dữ liệu vào Neo4j:
 
-![Trực quan hóa Đồ thị Neo4j - Bệnh Tả (A00.0)](visualisation_2.png)
+### 1. Mạng lưới Tổng quan (Macroscopic View)
+Khi mở rộng góc nhìn toàn cảnh, đồ thị thể hiện rõ sự liên thông phức tạp giữa các họ bệnh khác nhau. Các mã bệnh không tồn tại độc lập mà chia sẻ chung nhiều tập hợp thực thể như triệu chứng lâm sàng, phác đồ dùng thuốc, hoặc yếu tố nguy cơ. Sự giao thoa này tạo thành các cụm tri thức (clusters) nối kết chặt chẽ, hỗ trợ rất tốt cho việc chẩn đoán phân biệt.
+
+![Tổng quan liên kết các họ bệnh trên Đồ thị Neo4j](image_d33bff.png)
+
+### 2. Góc nhìn Chi tiết (Microscopic View)
+Khi đi sâu vào một node cụ thể, ví dụ như mã bệnh **A00.0 (Bệnh tả do Vibrio cholerae 01, típ sinh học cholerae)**, chúng ta có thể thấy rõ cấu trúc mạng lưới hình sao bao quanh bệnh lý này:
+
+![Trực quan hóa chi tiết Đồ thị Neo4j - Bệnh Tả (A00.0)](visualisation_2.png)
+
+Từ node trung tâm (Bệnh), hệ thống có thể dễ dàng truy xuất:
+* **`HAS_SYMPTOM`**: Các triệu chứng đặc trưng (nôn, tiêu chảy, chuột rút, mất nước).
+* **`TREATS` / `DIAGNOSED_BY`**: Các loại thuốc điều trị và phương pháp xét nghiệm tương ứng.
+* **`IS_SUBTYPE_OF`**: Mối quan hệ phân cấp ngược lên bệnh gốc trong danh mục ICD-10 (Bệnh tả A00).
 
 Thông qua mạng lưới này, từ một node trung tâm (Bệnh), có thể dễ dàng truy xuất ngược - xuôi để tìm các tập hợp thuốc điều trị, triệu chứng lâm sàng đặc trưng hoặc chẩn đoán phân biệt với các bệnh có chung tập triệu chứng.
 

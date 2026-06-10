@@ -84,7 +84,7 @@ Dưới đây là các minh họa khi đưa dữ liệu vào Neo4j:
 ### 1. Mạng lưới Tổng quan (Macroscopic View)
 Khi mở rộng góc nhìn toàn cảnh, đồ thị thể hiện rõ sự liên thông phức tạp giữa các họ bệnh khác nhau. Các mã bệnh không tồn tại độc lập mà chia sẻ chung nhiều tập hợp thực thể như triệu chứng lâm sàng, phác đồ dùng thuốc, hoặc yếu tố nguy cơ. Sự giao thoa này tạo thành các cụm tri thức (clusters) nối kết chặt chẽ, hỗ trợ rất tốt cho việc chẩn đoán phân biệt.
 
-![Tổng quan liên kết các họ bệnh trên Đồ thị Neo4j](image_d33bff.png)
+![Tổng quan của một node bệnh](image_d33bff.png)
 
 ### 2. Góc nhìn Chi tiết (Microscopic View)
 Khi đi sâu vào một node cụ thể, ví dụ như mã bệnh **A00.0 (Bệnh tả do Vibrio cholerae 01, típ sinh học cholerae)**, chúng ta có thể thấy rõ cấu trúc mạng lưới hình sao bao quanh bệnh lý này:

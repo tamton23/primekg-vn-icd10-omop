@@ -103,9 +103,7 @@ Thông qua mạng lưới này, từ một node trung tâm (Bệnh), có thể d
 ## 📂 Cấu trúc Thư mục
 
 * `icd10_danh_muc.csv`: Tệp chứa danh mục gốc mã bệnh ICD-10 (Dữ liệu đầu vào).
-* `kg_output/`: Thư mục chứa toàn bộ kết quả cấu trúc Đồ thị Tri thức.
-    * `edges.csv`: Tệp chứa hơn 71 nghìn liên kết, mô tả quan hệ chi tiết kèm `evidence` và `source_url`.
-    * `nodes_*.csv`: Các tệp chứa định danh, loại và tên chuẩn hóa của từng tập đỉnh.
+* `edges.csv`: Tệp chứa hơn 71 nghìn liên kết, mô tả quan hệ chi tiết kèm `evidence` và `source_url`.
 * `emd.py`: Script Python để thống kê, phân tích mật độ và kiểm tra vùng phủ (Gaps) của Đồ thị.
 
 ---

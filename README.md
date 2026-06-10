@@ -108,10 +108,3 @@ Từ node Bệnh trung tâm, hệ thống truy xuất các triệu chứng (nôn
 * `emd.py`: Script thống kê, phân tích mật độ và kiểm tra vùng phủ (Gaps) của Đồ thị.
 * `kg_output/`: Thư mục chứa kết quả (`edges.csv`, `nodes_*.csv` và log `raw_sources.jsonl`).
 
-### 🚀 Lệnh khởi chạy Crawler
-```bash
-# Cào một bệnh cụ thể (VD: Bệnh tả), thu thập tối đa 15 bài báo/nguồn
-python run_crawl.py --query "Bệnh tả" --max_urls 15
-
-# Chạy cào toàn bộ danh mục tự động (Dựa trên checkpoint để tiếp tục nếu bị gián đoạn)
-python run_crawl.py --crawl_all

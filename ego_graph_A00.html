@@ -1,0 +1,178 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#E74C3C", "font": {"color": "black"}, "id": "A00", "label": "B\u1ec7nh t\u1ea3", "shape": "dot", "size": 40, "title": "[Disease] B\u1ec7nh t\u1ea3"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_269a9da3e5", "label": "Ti\u00eau ch\u1ea3y li\u00ean t\u1ee5c", "shape": "dot", "size": 20, "title": "[Symptom] Ti\u00eau ch\u1ea3y li\u00ean t\u1ee5c"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_bcee72e6df", "label": "N\u00f4n", "shape": "dot", "size": 20, "title": "[Symptom] N\u00f4n"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_95c285de31", "label": "M\u1ea5t n\u01b0\u1edbc \u0111i\u1ec7n gi\u1ea3i", "shape": "dot", "size": 20, "title": "[Symptom] M\u1ea5t n\u01b0\u1edbc \u0111i\u1ec7n gi\u1ea3i"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_3a56ffce7e", "label": "Suy th\u1eadn", "shape": "dot", "size": 20, "title": "[Symptom] Suy th\u1eadn"}, {"color": "#9B59B6", "font": {"color": "black"}, "id": "DIAG_8a730a31d8", "label": "Soi ph\u00e2n", "shape": "dot", "size": 20, "title": "[DiagnosticTest] Soi ph\u00e2n"}, {"color": "#9B59B6", "font": {"color": "black"}, "id": "DIAG_492cf93a58", "label": "Nhu\u1ed9m Gr", "shape": "dot", "size": 20, "title": "[DiagnosticTest] Nhu\u1ed9m Gr"}, {"color": "#9B59B6", "font": {"color": "black"}, "id": "DIAG_18b113cad9", "label": "C\u1ea5y ph\u00e2n", "shape": "dot", "size": 20, "title": "[DiagnosticTest] C\u1ea5y ph\u00e2n"}, {"color": "#9B59B6", "font": {"color": "black"}, "id": "DIAG_a7c0720ae2", "label": "PCR", "shape": "dot", "size": 20, "title": "[DiagnosticTest] PCR"}, {"color": "#E67E22", "font": {"color": "black"}, "id": "COMP_3a56ffce7e", "label": "Suy th\u1eadn", "shape": "dot", "size": 20, "title": "[Complication] Suy th\u1eadn"}, {"color": "#E67E22", "font": {"color": "black"}, "id": "COMP_8662782b35", "label": "T\u1eed vong nhanh", "shape": "dot", "size": 20, "title": "[Complication] T\u1eed vong nhanh"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_80c5e859e7", "label": "Ti\u00eau ch\u1ea3y n\u01b0\u1edbc", "shape": "dot", "size": 20, "title": "[Symptom] Ti\u00eau ch\u1ea3y n\u01b0\u1edbc"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_c3d4ce654f", "label": "N\u00f4n m\u1eeda", "shape": "dot", "size": 20, "title": "[Symptom] N\u00f4n m\u1eeda"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_101ccf4608", "label": "M\u1ea5t n\u01b0\u1edbc n\u1eb7ng", "shape": "dot", "size": 20, "title": "[Symptom] M\u1ea5t n\u01b0\u1edbc n\u1eb7ng"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_7571c944ce", "label": "S\u1ed1t nh\u1eb9", "shape": "dot", "size": 20, "title": "[Symptom] S\u1ed1t nh\u1eb9"}, {"color": "#E67E22", "font": {"color": "black"}, "id": "COMP_c983e89bb9", "label": "Tr\u1ee5y tim m\u1ea1ch", "shape": "dot", "size": 20, "title": "[Complication] Tr\u1ee5y tim m\u1ea1ch"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_75d4a08bf6", "label": "Ti\u00eau ch\u1ea3y d\u1eef d\u1ed9i", "shape": "dot", "size": 20, "title": "[Symptom] Ti\u00eau ch\u1ea3y d\u1eef d\u1ed9i"}, {"color": "#F1C40F", "font": {"color": "black"}, "id": "SYMP_ed4850c575", "label": "M\u1ea5t n\u01b0\u1edbc v\u00e0 \u0111i\u1ec7n gi\u1ea3i", "shape": "dot", "size": 20, "title": "[Symptom] M\u1ea5t n\u01b0\u1edbc v\u00e0 \u0111i\u1ec7n gi\u1ea3i"}, {"color": "#1ABC9C", "font": {"color": "black"}, "id": "DEMO_3cf5310ad2", "label": "Ng\u01b0\u1eddi gi\u00e0", "shape": "dot", "size": 20, "title": "[Demographic] Ng\u01b0\u1eddi gi\u00e0"}, {"color": "#1ABC9C", "font": {"color": "black"}, "id": "DEMO_79c5ca4e86", "label": "Tr\u1ebb em", "shape": "dot", "size": 20, "title": "[Demographic] Tr\u1ebb em"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_e81c8d9663", "label": "\u0102n u\u1ed1ng th\u1ef1c ph\u1ea9m ch\u01b0a n\u1ea5u ch\u00edn", "shape": "dot", "size": 20, "title": "[RiskFactor] \u0102n u\u1ed1ng th\u1ef1c ph\u1ea9m ch\u01b0a n\u1ea5u ch\u00edn"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_a5053fb28f", "label": "Ti\u1ebfp x\u00fac v\u1edbi ng\u01b0\u1eddi b\u1ec7nh", "shape": "dot", "size": 20, "title": "[RiskFactor] Ti\u1ebfp x\u00fac v\u1edbi ng\u01b0\u1eddi b\u1ec7nh"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_3ab5b1f5b4", "label": "C\u01b0 tr\u00fa t\u1ea1i v\u00f9ng d\u1ecbch", "shape": "dot", "size": 20, "title": "[RiskFactor] C\u01b0 tr\u00fa t\u1ea1i v\u00f9ng d\u1ecbch"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_6036cad302", "label": "Ciprofloxacin", "shape": "dot", "size": 20, "title": "[Drug] Ciprofloxacin"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_649cef64d9", "label": "Azithromycin", "shape": "dot", "size": 20, "title": "[Drug] Azithromycin"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_492869bf44", "label": "Cloramphenicol", "shape": "dot", "size": 20, "title": "[Drug] Cloramphenicol"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_e91629ef68", "label": "Erythromycin", "shape": "dot", "size": 20, "title": "[Drug] Erythromycin"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_efff8ca52f", "label": "Doxycyclin", "shape": "dot", "size": 20, "title": "[Drug] Doxycyclin"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_b4be067bf6", "label": "B\u1ed3i ph\u1ee5 n\u01b0\u1edbc v\u00e0 \u0111i\u1ec7n gi\u1ea3i", "shape": "dot", "size": 20, "title": "[Intervention] B\u1ed3i ph\u1ee5 n\u01b0\u1edbc v\u00e0 \u0111i\u1ec7n gi\u1ea3i"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_93508fef43", "label": "Truy\u1ec1n d\u1ecbch", "shape": "dot", "size": 20, "title": "[Intervention] Truy\u1ec1n d\u1ecbch"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_b3225d1d27", "label": "Ng\u1eebng thu\u1ed1c gi\u1ea3m \u0111au kh\u00f4ng c\u1ea7n thi\u1ebft", "shape": "dot", "size": 20, "title": "[Intervention] Ng\u1eebng thu\u1ed1c gi\u1ea3m \u0111au kh\u00f4ng c\u1ea7n thi\u1ebft"}, {"color": "#7F8C8D", "font": {"color": "black"}, "id": "PATH_20d6db8b04", "label": "Vibrio cholerae", "shape": "dot", "size": 20, "title": "[Pathogen] Vibrio cholerae"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_dbd7893a78", "label": "N\u01b0\u1edbc \u00f4 nhi\u1ec5m", "shape": "dot", "size": 20, "title": "[RiskFactor] N\u01b0\u1edbc \u00f4 nhi\u1ec5m"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_9b33ec2325", "label": "Th\u1ef1c ph\u1ea9m s\u1ed1ng", "shape": "dot", "size": 20, "title": "[RiskFactor] Th\u1ef1c ph\u1ea9m s\u1ed1ng"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_002d78ae18", "label": "H\u1ea3i s\u1ea3n s\u1ed1ng", "shape": "dot", "size": 20, "title": "[RiskFactor] H\u1ea3i s\u1ea3n s\u1ed1ng"}, {"color": "#3498DB", "font": {"color": "black"}, "id": "DRUG_2080150a7f", "label": "K\u1ebdm", "shape": "dot", "size": 20, "title": "[Drug] K\u1ebdm"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_f5a6232c3f", "label": "B\u00f9 n\u01b0\u1edbc \u0111\u01b0\u1eddng u\u1ed1ng", "shape": "dot", "size": 20, "title": "[Intervention] B\u00f9 n\u01b0\u1edbc \u0111\u01b0\u1eddng u\u1ed1ng"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_9560a3104b", "label": "Truy\u1ec1n d\u1ecbch t\u0129nh m\u1ea1ch", "shape": "dot", "size": 20, "title": "[Intervention] Truy\u1ec1n d\u1ecbch t\u0129nh m\u1ea1ch"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_1bcac9a24e", "label": "U\u1ed1ng n\u01b0\u1edbc \u00f4 nhi\u1ec5m", "shape": "dot", "size": 20, "title": "[RiskFactor] U\u1ed1ng n\u01b0\u1edbc \u00f4 nhi\u1ec5m"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_041fdfcde5", "label": "\u0102n th\u1ef1c ph\u1ea9m s\u1ed1ng", "shape": "dot", "size": 20, "title": "[RiskFactor] \u0102n th\u1ef1c ph\u1ea9m s\u1ed1ng"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_8d3a4f0a16", "label": "Kh\u00f4ng v\u1ec7 sinh tay", "shape": "dot", "size": 20, "title": "[RiskFactor] Kh\u00f4ng v\u1ec7 sinh tay"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_b086bc3324", "label": "N\u01b0\u1edbc b\u1ea9n", "shape": "dot", "size": 20, "title": "[RiskFactor] N\u01b0\u1edbc b\u1ea9n"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_c3f375dc09", "label": "Th\u1ef1c ph\u1ea9m kh\u00f4ng \u0111\u1ea3m b\u1ea3o v\u1ec7 sinh", "shape": "dot", "size": 20, "title": "[RiskFactor] Th\u1ef1c ph\u1ea9m kh\u00f4ng \u0111\u1ea3m b\u1ea3o v\u1ec7 sinh"}, {"color": "#34495E", "font": {"color": "black"}, "id": "RISK_4789fbbffc", "label": "Th\u1ee9c \u0103n \u0111\u01b0\u1eddng ph\u1ed1", "shape": "dot", "size": 20, "title": "[RiskFactor] Th\u1ee9c \u0103n \u0111\u01b0\u1eddng ph\u1ed1"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_11e8fef551", "label": "U\u1ed1ng n\u01b0\u1edbc \u0111un s\u00f4i", "shape": "dot", "size": 20, "title": "[Intervention] U\u1ed1ng n\u01b0\u1edbc \u0111un s\u00f4i"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_19b674dc8d", "label": "R\u1eeda tay b\u1eb1ng x\u00e0 ph\u00f2ng", "shape": "dot", "size": 20, "title": "[Intervention] R\u1eeda tay b\u1eb1ng x\u00e0 ph\u00f2ng"}, {"color": "#2ECC71", "font": {"color": "black"}, "id": "INTE_3d5bb51b5b", "label": "Ti\u00eam ph\u00f2ng v\u1eafc xin", "shape": "dot", "size": 20, "title": "[Intervention] Ti\u00eam ph\u00f2ng v\u1eafc xin"}, {"color": "#7F8C8D", "font": {"color": "black"}, "id": "PATH_76cf1f81a4", "label": "Vi khu\u1ea9n t\u1ea3", "shape": "dot", "size": 20, "title": "[Pathogen] Vi khu\u1ea9n t\u1ea3"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_269a9da3e5", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_bcee72e6df", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_95c285de31", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_3a56ffce7e", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "title": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "to": "DIAG_8a730a31d8", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "title": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "to": "DIAG_492cf93a58", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "title": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "to": "DIAG_18b113cad9", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "title": "\u0111\u01b0\u1ee3c ch\u1ea9n \u0111o\u00e1n/x\u00e9t nghi\u1ec7m qua", "to": "DIAG_a7c0720ae2", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "title": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "to": "COMP_3a56ffce7e", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "title": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "to": "COMP_8662782b35", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_80c5e859e7", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_c3d4ce654f", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_101ccf4608", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_7571c944ce", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "title": "g\u00e2y ra bi\u1ebfn ch\u1ee9ng", "to": "COMP_c983e89bb9", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_75d4a08bf6", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "A00", "label": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "title": "c\u00f3 tri\u1ec7u ch\u1ee9ng l\u00e2m s\u00e0ng", "to": "SYMP_ed4850c575", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DEMO_3cf5310ad2", "label": "\u0111\u1ed1i t\u01b0\u1ee3ng nguy c\u01a1 cao/b\u1ec7nh n\u1ec1n", "title": "\u0111\u1ed1i t\u01b0\u1ee3ng nguy c\u01a1 cao/b\u1ec7nh n\u1ec1n", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DEMO_79c5ca4e86", "label": "\u0111\u1ed1i t\u01b0\u1ee3ng nguy c\u01a1 cao/b\u1ec7nh n\u1ec1n", "title": "\u0111\u1ed1i t\u01b0\u1ee3ng nguy c\u01a1 cao/b\u1ec7nh n\u1ec1n", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_e81c8d9663", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_a5053fb28f", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_3ab5b1f5b4", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_6036cad302", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_649cef64d9", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_492869bf44", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_e91629ef68", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_efff8ca52f", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_b4be067bf6", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_93508fef43", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_b3225d1d27", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "PATH_20d6db8b04", "label": "g\u00e2y ra b\u1ec7nh", "title": "g\u00e2y ra b\u1ec7nh", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_dbd7893a78", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_9b33ec2325", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_002d78ae18", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "DRUG_2080150a7f", "label": "\u0111i\u1ec1u tr\u1ecb", "title": "\u0111i\u1ec1u tr\u1ecb", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_f5a6232c3f", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_9560a3104b", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_1bcac9a24e", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_041fdfcde5", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_8d3a4f0a16", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_b086bc3324", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_c3f375dc09", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "RISK_4789fbbffc", "label": "l\u00e0m t\u0103ng nguy c\u01a1", "title": "l\u00e0m t\u0103ng nguy c\u01a1", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_11e8fef551", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_19b674dc8d", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "INTE_3d5bb51b5b", "label": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "title": "l\u00e0 m\u1ed9t ph\u1ea7n ph\u00e1c \u0111\u1ed3", "to": "A00", "width": 1}, {"arrows": "to", "font": {"align": "middle", "size": 10}, "from": "PATH_76cf1f81a4", "label": "g\u00e2y ra b\u1ec7nh", "title": "g\u00e2y ra b\u1ec7nh", "to": "A00", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.1,
+            "damping": 0.09,
+            "gravitationalConstant": -3000,
+            "springConstant": 0.001,
+            "springLength": 200
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

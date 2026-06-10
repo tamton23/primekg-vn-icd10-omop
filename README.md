@@ -1,83 +1,83 @@
-# PRIME-KG VN: Đồ thị Tri thức Y khoa Lâm sàng (ICD-10 & OMOP CDM)
+# PRIME-KG VN: Clinical Knowledge Graph (ICD-10 & OMOP CDM)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Data: Clinical](https://img.shields.io/badge/Data-Clinical_Medicine-red.svg)]()
 
-**PRIME-KG VN (Scientific Edition)** là một hệ thống tự động thu thập, trích xuất và xây dựng đồ thị tri thức y khoa (Knowledge Graph) tập trung chuyên sâu vào khía cạnh lâm sàng. 
+**PRIME-KG VN (Scientific Edition)** is an automated system for gathering, extracting, and constructing a medical knowledge graph with a deep focus on clinical aspects.
 
-Lấy danh mục mã bệnh **ICD-10** của Bộ Y tế Việt Nam làm xương sống, dự án này kiến tạo một mạng lưới liên kết có cấu trúc giữa các bệnh lý và hàng chục ngàn thực thể y khoa khác (Triệu chứng, Thuốc, Biến chứng, v.v.). Dữ liệu được tổng hợp, khử nhiễu tự động từ các nguồn chính thống trong nước và quốc tế. Toàn bộ cấu trúc đồ thị được ánh xạ tương thích với tiêu chuẩn **OMOP CDM 5.3.1**.
-
----
-
-## 💡 Đặc tính Kỹ thuật & Kiến trúc Hệ thống
-
-Hệ thống được xây dựng với tư duy kỹ thuật bền bỉ (Fault-tolerant) và kiến trúc dữ liệu nghiêm ngặt:
-
-* **Kiến trúc Cứng (Hard-Anchoring):** Khác với các hệ thống sinh đồ thị ngẫu nhiên, hệ thống này **KHÔNG** dùng LLM để tự bịa ra loại liên kết. Các cạnh được định nghĩa bằng toán học thông qua `RELATION_RULES` và liên kết nội bộ `EXCLUDES`/`INCLUDES` được bóc tách trực tiếp từ cột Hướng dẫn của WHO trong file ICD-10 gốc.
-* **Knowledge Hub (Khử trùng lặp):** Gộp các Node giống nhau (cùng SHA-256 hash), tự động nối chuỗi (`|`) các mô tả và bằng chứng (`evidence`) từ nhiều bài báo khác nhau vào một Node duy nhất.
-* **Tương thích igraph & Neo4j:** Sinh mã `node_index` liên tục tuyệt đối, đảm bảo mapping `x_id`/`y_id` chuẩn xác 100%, sẵn sàng nạp vào bất kỳ cơ sở dữ liệu đồ thị nào.
-* **Cơ chế Chống sập (Anti-Crash):** Tích hợp tính năng *Kiểm toán chéo* để gỡ checkpoint các bệnh cào lỗi. Kết hợp hệ thống Auto-Save theo từng cụm và thuật toán xoay vòng SearXNG URL để chống rate-limit.
+Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its backbone, this project creates a structured network linking diseases with tens of thousands of other medical entities (Symptoms, Drugs, Complications, etc.). Data is aggregated and automatically cleaned from official domestic and international sources. The entire graph structure is mapped to be compatible with the **OMOP CDM 5.3.1** standard.
 
 ---
 
-## 🌐 Phân luồng Dữ liệu "5 Tầng" & Đa Ngữ
+## 💡 Technical Features & System Architecture
 
-Quá trình crawl dữ liệu (Web Scraping) được tối ưu hóa bằng `ThreadPoolExecutor` và chia làm 5 tầng uy tín từ cao xuống thấp. **Đặc biệt, hệ thống tự động dịch từ khóa sang Tiếng Anh** khi tìm kiếm ở các tầng quốc tế:
+The system is built with fault-tolerant principles and rigorous data architecture:
 
-1.  **Tầng 1 (Chính thống VN):** `gov.vn`, `tapchiyhocduphong.vn`, `vjmed.org.vn`...
-2.  **Tầng 2 (Bệnh viện lớn VN):** `vinmec.com`, `nhathuoclongchau.com.vn`, `medlatec.vn`...
-3.  **Tầng 3 (Học thuật Quốc tế - Tự dịch Tiếng Anh):** `ncbi.nlm.nih.gov`, `thelancet.com`, `jamanetwork.com`...
-4.  **Tầng 4 (Tổ chức Y tế - Tự dịch Tiếng Anh):** `who.int`, `cdc.gov`, `mayoclinic.org`...
-5.  **Tầng 5 (Nguồn mở rộng):** Mở xích tìm kiếm tự do nếu 4 tầng trên không cung cấp đủ số bài quy định.
-
----
-
-## 🤖 Luồng Xử lý AI Đa tác tử (Multi-Agent Pipeline)
-
-Thay vì dùng 1 prompt nhồi nhét, hệ thống sử dụng Ollama (Qwen3-VL 8B) vận hành song song 3 Agent độc lập với chuẩn `format: json` ép buộc:
-
-1.  **Agent Evaluator (Người gác cổng):** Phân tích 2000 ký tự đầu của bài báo. **Chặn đứng** các tài liệu Thú Y thuần túy (chữa bệnh cho heo, gà, chó, mèo), nhưng đủ thông minh để **Cho phép** các bài viết về bệnh truyền nhiễm từ động vật sang người (Zoonotic disease).
-2.  **Agent Extractor (Máy trích xuất):** Đọc sâu tới 25.000 ký tự. Bóc tách triệt để 9 loại thực thể lâm sàng, ép buộc dịch mọi dữ liệu sang Tiếng Việt chuẩn và bắt buộc trích xuất câu nguyên văn làm `evidence`.
-3.  **Agent Reviewer (Giám sát viên):** Kiểm tra lại tập hợp các thực thể vừa bóc tách, loại bỏ các kết quả bị ảo giác (hallucination) hoặc quá dài dòng vô nghĩa trước khi đưa vào đồ thị.
+* **Hard-Anchoring Architecture:** Unlike random graph generation systems, this platform does **NOT** use LLMs to hallucinate relationship types. Edges are mathematically defined via `RELATION_RULES`, and internal `EXCLUDES`/`INCLUDES` links are extracted directly from the WHO guidance columns in the source ICD-10 file.
+* **Knowledge Hub (Deduplication):** Merges identical Nodes (based on SHA-256 hash), automatically concatenating descriptions and `evidence` from multiple articles into a single, comprehensive Node.
+* **igraph & Neo4j Compatibility:** Generates continuous `node_index` values, ensuring 100% accurate `x_id`/`y_id` mapping, ready for ingestion into any graph database.
+* **Anti-Crash Mechanism:** Integrates cross-audit features to resume from checkpoints on failed disease extractions. Combines auto-save per cluster and a rotating SearXNG URL algorithm to bypass rate-limiting.
 
 ---
 
-## 📊 Báo cáo Thống kê Dữ liệu Chi tiết
+## 🌐 5-Tier Data Pipeline & Multi-Language Support
 
-Tiến độ thu thập hiện tại đang tập trung ở vùng mã **A00 đến G00.1** (Bao phủ **1,219** mã bệnh có dữ liệu web thực tế trên tổng số 15,844 mã ICD-10 gốc, tương đương **7.69%**).
+Web scraping is optimized using `ThreadPoolExecutor` and divided into five tiers of authority. **Notably, the system automatically translates keywords into English** when querying international tiers:
 
-### 1. Phân bố Số lượng Đỉnh (Nodes)
-Đồ thị được phân chia rạch ròi thành 9 loại thực thể lâm sàng chính (Tổng cộng **32,163 Nodes**):
+1. **Tier 1 (VN Official):** `gov.vn`, `tapchiyhocduphong.vn`, `vjmed.org.vn`, etc.
+2. **Tier 2 (VN Major Hospitals):** `vinmec.com`, `nhathuoclongchau.com.vn`, `medlatec.vn`, etc.
+3. **Tier 3 (International Academia - Auto-translated):** `ncbi.nlm.nih.gov`, `thelancet.com`, `jamanetwork.com`, etc.
+4. **Tier 4 (Health Organizations - Auto-translated):** `who.int`, `cdc.gov`, `mayoclinic.org`, etc.
+5. **Tier 5 (Extended Sources):** Performs open-search queries if the top 4 tiers do not provide the required number of articles.
 
-| Loại Thực thể | Khái niệm | Số lượng | Tỷ lệ (%) |
+---
+
+## 🤖 Multi-Agent AI Pipeline
+
+Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) operating three independent agents with strict `format: json` enforcement:
+
+1. **Agent Evaluator (Gatekeeper):** Analyzes the first 2,000 characters of the article. **Blocks** pure Veterinary documents (treating pigs, chickens, dogs, cats) while remaining intelligent enough to **Allow** articles concerning Zoonotic diseases.
+2. **Agent Extractor (Extraction Engine):** Conducts deep reading of up to 25,000 characters. Extracts 9 types of clinical entities, enforces translation of all data into standardized Vietnamese, and strictly mandates quoting the original text as `evidence`.
+3. **Agent Reviewer (Supervisor):** Re-evaluates the extracted entities, purging hallucinations or redundant content before final graph insertion.
+
+---
+
+## 📊 Detailed Data Statistics
+
+Data collection currently focuses on ICD-10 codes **A00 through G00.1** (Covering **1,219** diseases with verified web data out of 15,844 total codes, approximately **7.69%**).
+
+### 1. Node Distribution
+The graph is categorized into 9 primary clinical entity types (Total: **32,163 Nodes**):
+
+| Entity Type | Concept | Count | Percentage (%) |
 | :--- | :--- | :--- | :--- |
-| **RiskFactor** | Yếu tố nguy cơ | 4,974 | 15.46% |
-| **Symptom** | Triệu chứng lâm sàng | 4,832 | 15.02% |
-| **Intervention** | Can thiệp y tế | 4,618 | 14.36% |
-| **Disease** | Bệnh lý (Mã ICD-10) | 4,232 | 13.16% |
-| **Complication** | Biến chứng | 3,894 | 12.11% |
-| **Demographic** | Đặc điểm nhân khẩu học | 3,474 | 10.80% |
-| **DiagnosticTest**| Xét nghiệm / Chẩn đoán | 2,620 | 8.15% |
-| **Pathogen** | Tác nhân gây bệnh | 1,861 | 5.79% |
-| **Drug** | Thuốc điều trị | 1,658 | 5.15% |
+| **RiskFactor** | Risk Factors | 4,974 | 15.46% |
+| **Symptom** | Clinical Symptoms | 4,832 | 15.02% |
+| **Intervention** | Medical Interventions | 4,618 | 14.36% |
+| **Disease** | Disease (ICD-10) | 4,232 | 13.16% |
+| **Complication** | Complications | 3,894 | 12.11% |
+| **Demographic** | Demographics | 3,474 | 10.80% |
+| **DiagnosticTest**| Tests / Diagnostics | 2,620 | 8.15% |
+| **Pathogen** | Pathogens | 1,861 | 5.79% |
+| **Drug** | Medications | 1,658 | 5.15% |
 
-### 2. Phân tích Độ "Dày" Đồ thị (Graph Density)
-Tổng số cạnh đạt **76,415 Edges**. Với 1,219 bệnh sở hữu dữ liệu web thực tế, đồ thị đạt mật độ liên kết rất cao: **60.31 liên kết / 1 Bệnh**. Cụ thể, trung bình một mã bệnh sẽ được kết nối với:
-`11.0 Triệu chứng` | `8.6 Biến chứng` | `8.6 Yếu tố nguy cơ` | `8.5 Can thiệp y tế` | `7.8 Đặc điểm nhân khẩu` | `6.1 Phương pháp xét nghiệm` | `4.9 Thuốc điều trị` | `4.3 Tác nhân gây bệnh`.
+### 2. Graph Density Analysis
+The total number of edges is **76,415**. For the 1,219 diseases with real-world data, the graph achieves high connectivity: **60.31 links / Disease**. On average, a single disease code is connected to:
+`11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
 ---
 
-## 🔗 Cấu trúc Quan hệ & Tương thích OMOP CDM
+## 🔗 Relationship Structure & OMOP CDM Compatibility
 
-Hệ thống định nghĩa chặt chẽ 8 loại quan hệ có hướng, ánh xạ trực tiếp vào các bảng của **Mô hình Dữ liệu Chung OMOP (CDM v5.3.1)**:
+The system defines 8 directed relationship types, mapped directly to the **OMOP Common Data Model (CDM v5.3.1)** tables:
 
-| Loại Đỉnh Nguồn | Quan hệ (Relation) | Loại Đỉnh Đích | Ánh xạ Bảng OMOP CDM |
+| Source Node Type | Relation | Target Node Type | OMOP CDM Table Mapping |
 | :--- | :--- | :--- | :--- |
-| **Drug** | `TREATS` (Điều trị) | **Disease** | `drug_exposure` |
+| **Drug** | `TREATS` | **Disease** | `drug_exposure` |
 | **Intervention** | `PART_OF_TREATMENT` | **Disease** | `procedure_occurrence` |
 | **RiskFactor** | `INCREASES_RISK_OF` | **Disease** | `observation` |
-| **Pathogen** | `CAUSES` (Gây ra) | **Disease** | `specimen` / `observation` |
+| **Pathogen** | `CAUSES` | **Disease** | `specimen` / `observation` |
 | **Demographic** | `AFFECTS_POPULATION` | **Disease** | `concept` |
 | **Disease** | `HAS_SYMPTOM` | **Symptom** | `observation` |
 | **Disease** | `DIAGNOSED_BY` | **DiagnosticTest** | `measurement` |
@@ -85,26 +85,25 @@ Hệ thống định nghĩa chặt chẽ 8 loại quan hệ có hướng, ánh x
 
 ---
 
-## 🕸️ Trực quan hóa Đồ thị (Neo4j)
+## 🕸️ Graph Visualization (Neo4j)
 
-### 1. Mạng lưới Tổng quan (Macroscopic View)
-Khi mở rộng góc nhìn toàn cảnh, đồ thị thể hiện rõ sự liên thông phức tạp giữa các họ bệnh khác nhau. Các mã bệnh không tồn tại độc lập mà chia sẻ chung nhiều tập hợp thực thể (triệu chứng, thuốc), tạo thành các cụm tri thức hỗ trợ rất tốt cho chẩn đoán phân biệt.
+### 1. Macroscopic View
+The panoramic view clearly demonstrates the complex interconnections between various disease families. Diseases do not exist in isolation; they share common entity sets (symptoms, drugs), creating knowledge clusters that support differential diagnosis.
 
-![Tổng quan liên kết các họ bệnh trên Đồ thị Neo4j](image_d33bff.png)
+![Overview of disease family connections on Neo4j Graph](image_d33bff.png)
 
-### 2. Góc nhìn Chi tiết (Microscopic View)
-Khi đi sâu vào một node cụ thể, ví dụ mã bệnh **A00.0 (Bệnh tả do Vibrio cholerae 01, típ sinh học cholerae)**, chúng ta có thể thấy rõ cấu trúc mạng lưới hình sao:
+### 2. Microscopic View
+Deep-diving into a specific node, such as code **A00.0 (Cholera due to Vibrio cholerae 01, biovar cholerae)**, reveals a star-network structure:
 
-![Trực quan hóa chi tiết Đồ thị Neo4j - Bệnh Tả (A00.0)](visualisation_2.png)
+![Detailed visualization - Cholera (A00.0)](visualisation_2.png)
 
-Từ node Bệnh trung tâm, hệ thống truy xuất các triệu chứng (nôn, tiêu chảy, mất nước), thuốc điều trị, và mối quan hệ phân cấp `IS_SUBTYPE_OF` ngược lên bệnh gốc (Bệnh tả A00).
+From the central Disease node, the system retrieves symptoms (vomiting, diarrhea, dehydration), medications, and hierarchical `IS_SUBTYPE_OF` relationships pointing back to the parent disease (Cholera A00).
 
 ---
 
-## 📂 Cấu trúc Thư mục & Cách chạy
+## 📂 Project Structure & Execution
 
-* `run_crawl.py`: Script Core (Scientific Edition) điều khiển luồng cào dữ liệu, gọi Ollama và xây dựng đồ thị.
-* `icd10_danh_muc.csv`: Tệp chứa danh mục gốc mã bệnh ICD-10.
-* `emd.py`: Script thống kê, phân tích mật độ và kiểm tra vùng phủ (Gaps) của Đồ thị.
-* `kg_output/`: Thư mục chứa kết quả (`edges.csv`, `nodes_*.csv` và log `raw_sources.jsonl`).
-
+* `run_crawl.py`: Core Script (Scientific Edition) controlling the data scraping flow, Ollama integration, and graph construction.
+* `icd10_danh_muc.csv`: Contains the original ICD-10 master list.
+* `emd.py`: Analysis script for statistics, density metrics, and graph coverage (Gaps).
+* `kg_output/`: Directory containing results (`edges.csv`, `nodes_*.csv`, and `raw_sources.jsonl` logs).

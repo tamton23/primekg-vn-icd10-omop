@@ -5,9 +5,9 @@
 [![Data: Clinical](https://img.shields.io/badge/Data-Clinical_Medicine-red.svg)]()
 
 ## 📝 Introduction
-PRIME-KG VN (Scientific Edition) is an advanced, automated framework designed to construct a large-scale clinical knowledge graph tailored for the Vietnamese healthcare ecosystem. By integrating the localized ICD-10 disease classification matrix with standard international clinical vocabularies, this platform establishes an evidence-traceable, high-density relational network. It serves as a foundational infrastructure for clinical decision support systems, semantic medical search engines, and observational health data analytics.
+PRIME-KG VN (Scientific Edition) is an advanced, automated framework designed to construct a large-scale clinical knowledge graph tailored for the Vietnamese healthcare ecosystem. By integrating the localized ICD-10 disease classification matrix with standard international clinical vocabularies, this platform establishes an evidence-traceable, high-density relational network. Nine types of clinical entities are mapped into a unified semantic schema conceptually aligned with the target domains of the OMOP Common Data Model (OMOP CDM), establishing an interoperable cross-referencing system optimized for cross-database health analytics rather than direct physical database alteration.
 
-Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its backbone, this project creates a structured network linking diseases with tens of thousands of other medical entities (Symptoms, Drugs, Complications, etc.). Data is aggregated and automatically cleaned from official domestic and international sources. The entire graph structure is mapped to be compatible with the **OMOP CDM 5.3.1** standard.
+Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its backbone, this project creates a structured network linking diseases with tens of thousands of other medical entities (Symptoms, Drugs, Complications, etc.). Data is aggregated and automatically cleaned from official domestic and international sources, providing a foundational infrastructure for clinical decision support systems, semantic medical search engines, and observational health data networks.
 
 ---
 
@@ -76,16 +76,15 @@ The graph is categorized into 9 primary clinical entity types (Total: **32,163 N
 For the 1,219 diseases with real-world data, the graph achieves high connectivity: **60.31 links / Disease**. On average, a single disease code is connected to:
 `11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
+### 3. Semantic Mapping to the OMOP CDM for Clinical Querying
 
-### 3 Semantic Mapping to the OMOP CDM for Clinical Querying
+The OMOP Common Data Model version 5.3.1, developed by the Observational Health Data Sciences and Informatics (OHDSI) community, provides a standard for integrating healthcare data from multiple sources. To bridge the gap between theoretical medical knowledge and real-world evidence, our knowledge graph serves as an intelligent semantic routing layer rather than a direct physical data storage unit within the relational medical database.
 
-The OMOP Common Data Model version 5.3.1, developed by the Observational Health Data Sciences and Informatics (OHDSI) community, provides a standard for integrating healthcare data from multiple sources. To bridge the gap between theoretical medical knowledge and real-world evidence, our knowledge graph serves as a semantic layer rather than a direct physical storage unit. 
+Table 2 maps the vertices and edges of the KG to the corresponding OMOP tables, establishing a structured **Query Mapping Framework**.
 
-Table 2 maps the vertices and edges of the KG to the corresponding OMOP clinical event tables, establishing a **Query Mapping Framework**.
+**Table 2. Query Mapping of KG entities to OMOP CDM tables**
 
-**Table 2. Query Mapping of KG entities to OMOP CDM clinical event tables**
-
-| Source Node Type | Relation | Target Node Type | Target OMOP Clinical Table (Query Mapping) |
+| Source Node Type | Relation | Target Node Type | Target OMOP Table (Query Mapping) |
 | :--- | :--- | :--- | :--- |
 | **Drug** | `TREATS` | **Disease** | `drug_exposure` |
 | **Intervention** | `PART_OF_TREATMENT` | **Disease** | `procedure_occurrence` |
@@ -96,8 +95,9 @@ Table 2 maps the vertices and edges of the KG to the corresponding OMOP clinical
 | **Disease** | `DIAGNOSED_BY` | **DiagnosticTest** | `measurement` |
 | **Disease** | `HAS_COMPLICATION` | **Complication** | `condition_occurrence` |
 
+By defining this structural correspondence, the KG acts as an automated semantic router for downstream data pipelines. For instance, when a Drug is linked to a Disease via the TREATS relationship in the graph, the system explicitly knows to target the `drug_exposure` table in a hospital's relational database to extract actual patient treatment records. Thanks to this cross-referencing schema, the constructed knowledge graph can be readily integrated with existing health information infrastructures (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
 
-By defining this structural correspondence, the KG acts as an intelligent routing mechanism. For instance, when a Drug is linked to a Disease via the TREATS relationship in the graph, the system explicitly knows to target the drug_exposure table in a hospital's relational database to extract actual patient treatment records. Thanks to this mapping, the constructed knowledge graph can be readily integrated with existing healthcare data systems (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
+---
 
 ## 🕸️ Graph Visualization (Neo4j)
 

@@ -1,7 +1,7 @@
 # PRIME-KG VN: Clinical Knowledge Graph (ICD-10 & OMOP CDM)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Data: Clinical](https://img.shields.io/badge/Data-Clinical_Medicine-red.svg)]()
 
 ## 📝 Introduction

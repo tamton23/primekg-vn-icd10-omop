@@ -77,21 +77,26 @@ For the 1,219 diseases with real-world data, the graph achieves high connectivit
 `11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
 ---
-## 🔗 Revised Relationship Structure & OMOP CDM Compatibility
+### 3.4 Semantic Mapping to the OMOP CDM for Clinical Querying
 
-The system defines 8 directed relationship types, mapped directly to the **OMOP Common Data Model (CDM v5.3.1)** standardized vocabularies:
+The OMOP Common Data Model version 5.3.1, developed by the Observational Health Data Sciences and Informatics (OHDSI) community, provides a standard for integrating healthcare data from multiple sources. To bridge the gap between theoretical medical knowledge and real-world evidence, our knowledge graph serves as a semantic layer rather than a direct physical storage unit. 
 
-| Source Node Type | Target OMOP Domain | Relation | Target Node Type | OMOP CDM Table Mapping |
-| :--- | :--- | :--- | :--- | :--- |
-| **Drug** | `Drug` | `TREATS` | **Disease** | `concept_relationship` |
-| **Intervention** | `Procedure` | `PART_OF_TREATMENT` | **Disease** | `concept_relationship` |
-| **RiskFactor** | `Observation` | `INCREASES_RISK_OF` | **Disease** | `concept_relationship` |
-| **Pathogen** | `Observation` | `CAUSES` | **Disease** | `concept_relationship` |
-| **Demographic** | `Observation` | `AFFECTS_POPULATION` | **Disease** | `concept_relationship` |
-| **Disease** | `Condition` | `HAS_SYMPTOM` | **Symptom** | `concept_relationship` |
-| **Disease** | `Condition` | `DIAGNOSED_BY` | **DiagnosticTest** | `concept_relationship` |
-| **Disease** | `Condition` | `HAS_COMPLICATION` | **Complication** | `concept_relationship` |
+Table 2 maps the vertices and edges of the KG to the corresponding OMOP clinical event tables, establishing a **Query Mapping Framework**.
 
+**Table 2. Query Mapping of KG entities to OMOP CDM clinical event tables**
+
+| Source Node Type | Relation | Target Node Type | Target OMOP Clinical Table (Query Mapping) |
+| :--- | :--- | :--- | :--- |
+| **Drug** | `TREATS` | **Disease** | `drug_exposure` |
+| **Intervention** | `PART_OF_TREATMENT` | **Disease** | `procedure_occurrence` |
+| **RiskFactor** | `INCREASES_RISK_OF` | **Disease** | `observation` |
+| **Pathogen** | `CAUSES` | **Disease** | `specimen` / `observation` |
+| **Demographic** | `AFFECTS_POPULATION` | **Disease** | `concept` |
+| **Disease** | `HAS_SYMPTOM` | **Symptom** | `observation` |
+| **Disease** | `DIAGNOSED_BY` | **DiagnosticTest** | `measurement` |
+| **Disease** | `HAS_COMPLICATION` | **Complication** | `condition_occurrence` |
+
+By defining this structural correspondence, the KG acts as an intelligent routing mechanism. For instance, when a `Drug` is linked to a `Disease` via the `TREATS` relationship in the graph, the system explicitly knows to target the `drug_exposure` table in a hospital's relational database to extract actual patient treatment records. Thanks to this mapping, the constructed knowledge graph can be readily integrated with existing healthcare data systems (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
 ---
 
 ## 🕸️ Graph Visualization (Neo4j)

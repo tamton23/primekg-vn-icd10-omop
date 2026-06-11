@@ -105,5 +105,5 @@ From the central Disease node, the system retrieves symptoms (vomiting, diarrhea
 
 * `run_crawl.py`: Core Script (Scientific Edition) controlling the data scraping flow, Ollama integration, and graph construction.
 * `icd10_danh_muc.csv`: Contains the original ICD-10 master list.
-* `emd.py`: Analysis script for statistics, density metrics, and graph coverage (Gaps).
-* `kg_output/`: Directory containing results (`edges.csv`, `nodes_*.csv`, and `raw_sources.jsonl` logs).
+* `analyze.py`: Analysis script for statistics, density metrics, and graph coverage (Gaps).
+* `edges.zip`: Directory containing results (`edges.csv`, `nodes_*.csv`, and `raw_sources.jsonl` logs).

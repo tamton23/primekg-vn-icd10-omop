@@ -77,21 +77,20 @@ For the 1,219 diseases with real-world data, the graph achieves high connectivit
 `11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
 ---
+## 🔗 Revised Relationship Structure & OMOP CDM Compatibility
 
-## 🔗 Relationship Structure & OMOP CDM Compatibility
+The system defines 8 directed relationship types, mapped directly to the **OMOP Common Data Model (CDM v5.3.1)** standardized vocabularies:
 
-The system defines 8 directed relationship types, mapped directly to the **OMOP Common Data Model (CDM v5.3.1)** tables:
-
-| Source Node Type | Relation | Target Node Type | OMOP CDM Table Mapping |
-| :--- | :--- | :--- | :--- |
-| **Drug** | `TREATS` | **Disease** | `drug_exposure` |
-| **Intervention** | `PART_OF_TREATMENT` | **Disease** | `procedure_occurrence` |
-| **RiskFactor** | `INCREASES_RISK_OF` | **Disease** | `observation` |
-| **Pathogen** | `CAUSES` | **Disease** | `specimen` / `observation` |
-| **Demographic** | `AFFECTS_POPULATION` | **Disease** | `concept` |
-| **Disease** | `HAS_SYMPTOM` | **Symptom** | `observation` |
-| **Disease** | `DIAGNOSED_BY` | **DiagnosticTest** | `measurement` |
-| **Disease** | `HAS_COMPLICATION` | **Complication** | `condition_occurrence` |
+| Source Node Type | Target OMOP Domain | Relation | Target Node Type | OMOP CDM Table Mapping |
+| :--- | :--- | :--- | :--- | :--- |
+| **Drug** | `Drug` | `TREATS` | **Disease** | `concept_relationship` |
+| **Intervention** | `Procedure` | `PART_OF_TREATMENT` | **Disease** | `concept_relationship` |
+| **RiskFactor** | `Observation` | `INCREASES_RISK_OF` | **Disease** | `concept_relationship` |
+| **Pathogen** | `Observation` | `CAUSES` | **Disease** | `concept_relationship` |
+| **Demographic** | `Observation` | `AFFECTS_POPULATION` | **Disease** | `concept_relationship` |
+| **Disease** | `Condition` | `HAS_SYMPTOM` | **Symptom** | `concept_relationship` |
+| **Disease** | `Condition` | `DIAGNOSED_BY` | **DiagnosticTest** | `concept_relationship` |
+| **Disease** | `Condition` | `HAS_COMPLICATION` | **Complication** | `concept_relationship` |
 
 ---
 

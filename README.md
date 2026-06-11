@@ -77,7 +77,7 @@ For the 1,219 diseases with real-world data, the graph achieves high connectivit
 `11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
 
-### 3.4 Semantic Mapping to the OMOP CDM for Clinical Querying
+### 3 Semantic Mapping to the OMOP CDM for Clinical Querying
 
 The OMOP Common Data Model version 5.3.1, developed by the Observational Health Data Sciences and Informatics (OHDSI) community, provides a standard for integrating healthcare data from multiple sources. To bridge the gap between theoretical medical knowledge and real-world evidence, our knowledge graph serves as a semantic layer rather than a direct physical storage unit. 
 

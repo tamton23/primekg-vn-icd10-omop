@@ -76,7 +76,7 @@ The graph is categorized into 9 primary clinical entity types (Total: **32,163 N
 For the 1,219 diseases with real-world data, the graph achieves high connectivity: **60.31 links / Disease**. On average, a single disease code is connected to:
 `11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
 
----
+
 ### 3.4 Semantic Mapping to the OMOP CDM for Clinical Querying
 
 The OMOP Common Data Model version 5.3.1, developed by the Observational Health Data Sciences and Informatics (OHDSI) community, provides a standard for integrating healthcare data from multiple sources. To bridge the gap between theoretical medical knowledge and real-world evidence, our knowledge graph serves as a semantic layer rather than a direct physical storage unit. 
@@ -96,8 +96,8 @@ Table 2 maps the vertices and edges of the KG to the corresponding OMOP clinical
 | **Disease** | `DIAGNOSED_BY` | **DiagnosticTest** | `measurement` |
 | **Disease** | `HAS_COMPLICATION` | **Complication** | `condition_occurrence` |
 
-By defining this structural correspondence, the KG acts as an intelligent routing mechanism. For instance, when a `Drug` is linked to a `Disease` via the `TREATS` relationship in the graph, the system explicitly knows to target the `drug_exposure` table in a hospital's relational database to extract actual patient treatment records. Thanks to this mapping, the constructed knowledge graph can be readily integrated with existing healthcare data systems (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
----
+
+By defining this structural correspondence, the KG acts as an intelligent routing mechanism. For instance, when a Drug is linked to a Disease via the TREATS relationship in the graph, the system explicitly knows to target the drug_exposure table in a hospital's relational database to extract actual patient treatment records. Thanks to this mapping, the constructed knowledge graph can be readily integrated with existing healthcare data systems (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
 
 ## 🕸️ Graph Visualization (Neo4j)
 

@@ -1,4 +1,4 @@
-# PRIME-KG VN: Clinical Knowledge Graph (ICD-10 & OMOP CDM)
+# PRIME-KG VN: Clinical Knowledge Graph (ICD-10)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
@@ -55,6 +55,8 @@ Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) ope
 
 Data collection currently focuses on ICD-10 codes **A00 through G00.1**. Out of 2,872 codes within this targeted range, **1,219 diseases** have been successfully processed and verified with real web data, representing an effective range coverage of **42.44%** (approximately **7.69%** of the 15,844 total codes in the master catalog).
 
+> ⚠️ **Dataset Scope & Evaluation Limitation:** Because data collection is currently in a partial scanning phase (restricted to the `A00`–`G00.1` subgroup), a full macro-structural comparison against the complete global baseline dataset or the entire 15,844-code catalog has been intentionally omitted in this release. 
+
 * **Identified Knowledge Gaps:** 1,653 codes within the scanned range are currently marked as sparse/missing due to technical constraints (such as aggregator resource overload, intermediate timeouts, structural web authentication, or a lack of qualified native-language clinical content). Specific data gaps include: `A37.0`, `A37.8`, `A49.1`, `A51.2`, `A59`, `A77.1`, `A95.0`, `B15`, `B15.0`, `B15.9`, `B18.2`, and the `B20.0` through `B20.8` series.
 
 ### 1. Node Distribution
@@ -96,6 +98,35 @@ Table 2 maps the vertices and edges of the KG to the corresponding OMOP tables, 
 | **Disease** | `HAS_COMPLICATION` | **Complication** | `condition_occurrence` |
 
 By defining this structural correspondence, the KG acts as an automated semantic router for downstream data pipelines. For instance, when a Drug is linked to a Disease via the TREATS relationship in the graph, the system explicitly knows to target the `drug_exposure` table in a hospital's relational database to extract actual patient treatment records. Thanks to this cross-referencing schema, the constructed knowledge graph can be readily integrated with existing health information infrastructures (electronic health records, observational studies) and can leverage OHDSI analytical tools such as ATLAS, Achilles, and Circe.
+
+---
+
+## 🚀 Full-Scale Projection & Scaling Strategy
+
+Based on the empirical baseline established from the initial 2,872 scanned codes, we project the graph's scale, resource requirements, and knowledge gaps if the system is expanded to process the entire **15,844 ICD-10 catalog**.
+
+### 1. Projected Graph Scale
+If deployed across all 15,844 codes, the graph will reach the scale of a National-Level Medical Knowledge Database:
+
+| Metric | Current (Tested Range) | Full Projection (15,844 Codes) | Note |
+| :--- | :--- | :--- | :--- |
+| **Successful Diseases** | 1,219 codes | **15,844 codes** | Target is 100% coverage of the Ministry of Health's ICD-10 catalog. |
+| **Total Edges** | 76,415 edges | **~ 955,000 edges** | Linear growth based on ~60.31 links/disease. |
+| **Total Nodes** | 32,163 nodes | **~ 200,000 - 250,000 nodes** | Logarithmic growth due to SHA-256 entity deduplication. |
+| **Database Size** | ~ 15 MB | **~ 180 - 200 MB** | Edges and Nodes CSV structures only. |
+| **Evidence Logs** | ~ 120 MB | **~ 1.5 - 2 GB** | Raw JSONL text excerpts. |
+
+### 2. Compute Load & Time Forecasting
+The computational load of the Multi-Agent LLM is the primary bottleneck for scaling out:
+* **Single-thread Processing:** ~33 days of continuous running (15,844 codes × 3 mins/code).
+* **Multi-threading (8 Workers):** ~4 to 5 days utilizing a dedicated lab server.
+* **LLM Token Consumption:** ~158 million input tokens (using Qwen3-VL 8B) for context reading.
+
+### 3. The Path to 100% Coverage
+Relying solely on Vietnamese medical data poses a challenge for achieving 100% coverage without empty nodes. To execute a complete scan of all 15,844 codes successfully, the architecture requires three essential upgrades:
+1. **Proxy Rotation Pool:** Integrating residential proxies to prevent Search Engine IP bans during massive parallel querying.
+2. **Vector Database Caching:** Utilizing ChromaDB or Milvus to cache downloaded web pages, preventing the LLM from redundantly parsing the same articles for closely related sub-diseases.
+3. **Translation Agent Layer:** For extremely rare or tropical diseases lacking Vietnamese literature, the system must autonomously generate English queries for PubMed/WHO, translate the extracted entities back to Vietnamese, and hash them into the graph.
 
 ---
 

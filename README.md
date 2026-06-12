@@ -177,26 +177,24 @@ RETURN disease.code AS Ma_Benh,
 ORDER BY So_Trieu_Chung_Khop DESC, Diem_Uu_Tien DESC
 LIMIT 100;
 ```
-### Top 10 Matching Diseases
+### Results
 
-| Disease code | Disease name | Matched symptoms | Matched complications | Match % | Diagnosis score |
-| --- | --- | --- | --- | --- | --- |
-| J44 | Chronic obstructive pulmonary disease (COPD) | 5 | 3 | 100.0 | 1450.0 |
-| J44 | Other chronic obstructive pulmonary disease | 8 | 4 | 35.0 | 840.0 |
-| J44.0 | COPD with acute lower respiratory infection | 3 | 5 | 36.67 | 605.06 |
-| J44.9 | COPD, unspecified | 6 | 3 | 34.48 | 603.4 |
-| J44.1 | Acute exacerbation of COPD, unspecified | 4 | 4 | 32.35 | 549.95 |
-| J44.8 | Other specified COPD | 3 | 4 | 33.33 | 466.62 |
-| J45.9 | Asthma, unspecified | 5 | 2 | 20.0 | 280.0 |
-| J45.8 | Mixed asthma | 4 | 1 | 19.23 | 182.69 |
-| J45 | Asthma | 3 | 1 | 17.86 | 151.81 |
-| J46 | Acute severe asthma | 4 | 2 | 11.48 | 137.76 |
+| disease_code | disease_name | matched_symptom_count | total_symptoms | priority_score |
+| --- | --- | --- | --- | --- |
+| A00.9 | Cholera, unspecified | 9 | 11 | 81.82 |
+| A00.0 | Cholera due to Vibrio cholerae 01, biovar cholerae | 9 | 12 | 75.00 |
+| A00 | Cholera | 8 | 10 | 80.00 |
+| A05 | Other bacterial foodborne intoxication, not elsewhere classified | 8 | 14 | 57.14 |
+| A00.1 | Cholera due to Vibrio cholerae 01, biovar eltor | 7 | 9 | 77.78 |
+| A07.1 | Giardiasis [lambliasis] | 7 | 10 | 70.00 |
+| A04.1 | Enterotoxigenic Escherichia coli infection (ETEC) | 7 | 14 | 50.00 |
+| A04.3 | Enterotoxigenic Escherichia coli infection (ETEC) | 7 | 15 | 46.67 |
 
 ### Insights
 
-- The base COPD (J44) achieves a perfect 100% match and highest score.
-- Subtypes (J44.x) have lower match percentages (32–37%) but still cluster in top 6, reflecting their variant or exacerbation nature.
-- Asthma codes (J45–J46) appear due to shared respiratory symptoms but score only 10–20% of COPD, enabling differentiation.
+- Cholera codes (A00.x) dominate the ranking due to the complete overlap of all four symptoms: diarrhea, vomiting, cramps, and dehydration.
+- Food poisoning (A05) and giardiasis (A07.1) also appear with high match counts, reflecting their clinical presentation.
+- The priority score helps distinguish diseases with the same raw symptom count; for example, A00.9 (81.82%) ranks higher than A00.0 (75.00%) even though both match 9 symptoms.
 
 ## 📂 Project Structure & Execution
 

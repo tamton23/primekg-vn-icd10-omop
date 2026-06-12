@@ -149,58 +149,54 @@ From the central Disease node, the system retrieves symptoms (vomiting, diarrhea
 
 The practical utility of the graph has been validated across key clinical exploration scenarios.
 
-### 1. COPD Differential Diagnosis using Weighted Feature Matching
+## Part 1: Disease detection via symptoms of diarrhea, vomiting, cramps, dehydration
 
-**Goal:** Identify diseases that best match the clinical profile of Chronic Obstructive Pulmonary Disease (COPD) based on symptoms, risk factors, and complications.
-
-**Cypher Query (simplified):**
+### Cypher query
 
 ```cypher
-// 1. Tìm tất cả bệnh có triệu chứng khớp với lời khai
-MATCH (disease:Entity)-[:LINKS_TO]->(s:Entity)
+MATCH (disease:Entity)-[L:INKS_TO]->(s:Entity)
 WHERE toLower(s.name) CONTAINS 'tiêu chảy'
     OR toLower(s.name) CONTAINS 'nôn'
-    OR toLower(s.name) CONTAINS 'chuột rút'
+    OR toLower(s.name) CONTAINS 'chuyết rút'
     OR toLower(s.name) CONTAINS 'mất nước'
 
-// 2. Đếm mỗi bệnh trúng được bao nhiêu triệu chứng
+// 2. Count how many symptoms match the user's input for each disease
 WITH disease, count(DISTINCT s) AS So_Trieu_Chung_Khop
 
-// 3. Đếm tổng số triệu chứng mà bệnh đó thực sự có trong DB
-MATCH (disease)-[:LINKS_TO]->(all_symptoms:Entity)
+// 3. Count TOTAL number of symptoms that disease actually has in the database
+MATCH (disease)-[L:INKS_TO]->(all_symptoms:Entity)
 WITH disease, So_Trieu_Chung_Khop, count(all_symptoms) AS Tong_So_Trieu_Chung
 
-// 4. Tính điểm ưu tiên và xếp hạng
+// 4. Calculate score and rank
 RETURN disease.code AS Ma_Benh,
-       disease.name AS Ten_Benh,
-       So_Trieu_Chung_Khop,
-       Tong_So_Trieu_Chung,
-       (toFloat(So_Trieu_Chung_Khop) / Tong_So_Trieu_Chung * 100) AS Diem_Uu_Tien
+    disease.name AS Ten_Benh,
+    So_Trieu_Chung_Khop,
+    Tong_So_Trieu_Chung,
+    (toFloat(So_Trieu_Chung_Khop) / Tong_So_Trieu_Chung * 100) AS Diem_Uu_Tien
+
 ORDER BY So_Trieu_Chung_Khop DESC, Diem_Uu_Tien DESC
 LIMIT 100;
 ```
 ### Top 10 Matching Diseases
 
-| Mã bệnh | Tên bệnh | Khớp triệu chứng | Khớp biến chứng | % khớp | Điểm chuẩn đoán |
+| Disease code | Disease name | Matched symptoms | Matched complications | Match % | Diagnosis score |
 | --- | --- | --- | --- | --- | --- |
-| J44 | Bệnh phổi tắc nghẽn mạn tính (COPD) | 5 | 3 | 100.0 | 1450.0 |
-| J44 | Bệnh phổi tắc nghẽn mạn tính khác | 8 | 4 | 35.0 | 840.0 |
-| J44.0 | COPD kèm nhiễm trùng hô hấp dưới cấp | 3 | 5 | 36.67 | 605.06 |
-| J44.9 | COPD, không xác định | 6 | 3 | 34.48 | 603.4 |
-| J44.1 | COPD đợt cấp, không xác định | 4 | 4 | 32.35 | 549.95 |
-| J44.8 | COPD xác định khác | 3 | 4 | 33.33 | 466.62 |
-| J45.9 | Hen phế quản, không xác định | 5 | 2 | 20.0 | 280.0 |
-| J45.8 | Hen phế quản hỗn hợp | 4 | 1 | 19.23 | 182.69 |
-| J45 | Hen phế quản | 3 | 1 | 17.86 | 151.81 |
-| J46 | Cơn hen ác tính | 4 | 2 | 11.48 | 137.76 |
+| J44 | Chronic obstructive pulmonary disease (COPD) | 5 | 3 | 100.0 | 1450.0 |
+| J44 | Other chronic obstructive pulmonary disease | 8 | 4 | 35.0 | 840.0 |
+| J44.0 | COPD with acute lower respiratory infection | 3 | 5 | 36.67 | 605.06 |
+| J44.9 | COPD, unspecified | 6 | 3 | 34.48 | 603.4 |
+| J44.1 | Acute exacerbation of COPD, unspecified | 4 | 4 | 32.35 | 549.95 |
+| J44.8 | Other specified COPD | 3 | 4 | 33.33 | 466.62 |
+| J45.9 | Asthma, unspecified | 5 | 2 | 20.0 | 280.0 |
+| J45.8 | Mixed asthma | 4 | 1 | 19.23 | 182.69 |
+| J45 | Asthma | 3 | 1 | 17.86 | 151.81 |
+| J46 | Acute severe asthma | 4 | 2 | 11.48 | 137.76 |
 
 ### Insights
 
 - The base COPD (J44) achieves a perfect 100% match and highest score.
 - Subtypes (J44.x) have lower match percentages (32–37%) but still cluster in top 6, reflecting their variant or exacerbation nature.
 - Asthma codes (J45–J46) appear due to shared respiratory symptoms but score only 10–20% of COPD, enabling differentiation.
-
----
 
 ## 📂 Project Structure & Execution
 

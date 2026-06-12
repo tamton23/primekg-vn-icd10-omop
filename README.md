@@ -1,13 +1,15 @@
-# PRIME-KG VN: Clinical Knowledge Graph (ICD-10)
+# PRIME-KG VN: Clinical Knowledge Graph (ICD-10 & OMOP CDM)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Data: Clinical](https://img.shields.io/badge/Data-Clinical_Medicine-red.svg)]()
 
 ## 📝 Introduction
-PRIME-KG VN (Scientific Edition) is an advanced, automated framework designed to construct a large-scale clinical knowledge graph tailored for the Vietnamese healthcare ecosystem. By integrating the localized ICD-10 disease classification matrix with standard international clinical vocabularies, this platform establishes an evidence-traceable, high-density relational network. Nine types of clinical entities are mapped into a unified semantic schema conceptually aligned with the target domains of the OMOP Common Data Model (OMOP CDM), establishing an interoperable cross-referencing system optimized for cross-database health analytics rather than direct physical database alteration.
+PRIME-KG VN (Scientific Edition) is an advanced, automated framework designed to construct a large-scale clinical knowledge graph tailored for the Vietnamese healthcare ecosystem. By integrating the localized ICD-10 disease classification matrix with standard international clinical vocabularies, this platform establishes a **fully evidence-traceable, high-density relational network**. Crucially, to ensure absolute data provenance and strict verifiability, **every single data point, entity, and relationship inserted into the graph is strictly coupled with an immutable reference link (source URL) pointing directly to the original underlying content.**
 
-Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its backbone, this project creates a structured network linking diseases with tens of thousands of other medical entities (Symptoms, Drugs, Complications, etc.). Data is aggregated and automatically cleaned from official domestic and international sources, providing a foundational infrastructure for clinical decision support systems, semantic medical search engines, and observational health data networks.
+Nine types of clinical entities are mapped into a unified semantic schema conceptually aligned with the target domains of the OMOP Common Data Model (OMOP CDM), establishing an interoperable cross-referencing system optimized for cross-database health analytics rather than direct physical database alteration.
+
+Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its backbone, this project creates a structured network linking diseases with tens of thousands of other medical entities (Symptoms, Drugs, Complications, etc.). Data is aggregated and automatically cleaned from official domestic and international sources, providing a foundational infrastructure for clinical decision support systems, semantic medical search engines, and observational health data networks with **zero-hallucination verification**.
 
 ---
 
@@ -15,8 +17,9 @@ Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its
 
 The system is built with fault-tolerant principles and rigorous data architecture:
 
+* **Strict Data Provenance & Traceability Layer:** Every node and edge in the network contains explicit metadata linking back to its origin. The system guarantees that no relational link is formed without an accompanying `source_url` and a verbatim text snippet (`evidence`) serving as an unalterable proof of truth.
 * **Hard-Anchoring Architecture:** Unlike random graph generation systems, this platform does **NOT** use LLMs to hallucinate relationship types. Edges are mathematically defined via `RELATION_RULES`, and internal `EXCLUDES`/`INCLUDES` links are extracted directly from the WHO guidance columns in the source ICD-10 file.
-* **Knowledge Hub (Deduplication):** Merges identical Nodes (based on SHA-256 hash), automatically concatenating descriptions and `evidence` from multiple articles into a single, comprehensive Node.
+* **Knowledge Hub (Deduplication):** Merges identical Nodes (based on SHA-256 hash), automatically concatenating descriptions and compiling `evidence` streams from multiple independent source URLs into a single, comprehensive knowledge entry without bloating the graph layout.
 * **igraph & Neo4j Compatibility:** Generates continuous `node_index` values, ensuring 100% accurate `x_id`/`y_id` mapping, ready for ingestion into any graph database.
 * **Anti-Crash Mechanism:** Integrates cross-audit features to resume from checkpoints on failed disease extractions. Combines auto-save per cluster and a rotating SearXNG URL algorithm to bypass rate-limiting.
 
@@ -26,7 +29,7 @@ The system is built with fault-tolerant principles and rigorous data architectur
 
 Web scraping is optimized using `ThreadPoolExecutor` and divided into five tiers of authority. **Notably, the system automatically translates keywords into English** when querying international tiers. 
 
-The overall graph contains **76,415 directed edges**, distributed with precise data lineage across the following authority tiers:
+The overall graph contains **76,415 directed edges**, distributed with precise data lineage and direct link attribution across the following authority tiers:
 
 1. **Tier 1 (VN Official):** `gov.vn`, `tapchiyhocduphong.vn`, `vjmed.org.vn`, `vjid.vn`, `yhth.vn`, etc.
    * **Data Contribution:** 36,269 edges (**47.46%** of the graph)
@@ -43,11 +46,11 @@ The overall graph contains **76,415 directed edges**, distributed with precise d
 
 ## 🤖 Multi-Agent AI Pipeline
 
-Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) operating three independent agents with strict `format: json` enforcement:
+Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) operating three independent agents with strict `format: json` enforcement to maintain data integrity:
 
 1. **Agent Evaluator (Gatekeeper):** Analyzes the first 2,000 characters of the article. **Blocks** pure Veterinary documents (treating pigs, chickens, dogs, cats) with a 96% accuracy filter while remaining intelligent enough to **Allow** articles concerning Zoonotic diseases.
-2. **Agent Extractor (Extraction Engine):** Conducts deep reading of up to 25,000 characters. Extracts 9 types of clinical entities, enforces translation of all data into standardized Vietnamese, and strictly mandates quoting the original text as `evidence`.
-3. **Agent Reviewer (Supervisor):** Re-evaluates the extracted entities, purging hallucinations or redundant content before final graph insertion.
+2. **Agent Extractor (Extraction Engine):** Conducts deep reading of up to 25,000 characters. Extracts 9 types of clinical entities, enforces translation of all data into standardized Vietnamese, and **strictly mandates quoting the exact verbatim sentence from the source document as `evidence` alongside its parent URL.**
+3. **Agent Reviewer (Supervisor):** Re-evaluates the extracted entities, cross-checking the extracted data against the original reference link to purge hallucinations or redundant content before final graph insertion.
 
 ---
 
@@ -114,7 +117,7 @@ If deployed across all 15,844 codes, the graph will reach the scale of a Nationa
 | **Total Edges** | 76,415 edges | **~ 955,000 edges** | Linear growth based on ~60.31 links/disease. |
 | **Total Nodes** | 32,163 nodes | **~ 200,000 - 250,000 nodes** | Logarithmic growth due to SHA-256 entity deduplication. |
 | **Database Size** | ~ 15 MB | **~ 180 - 200 MB** | Edges and Nodes CSV structures only. |
-| **Evidence Logs** | ~ 120 MB | **~ 1.5 - 2 GB** | Raw JSONL text excerpts. |
+| **Evidence Logs** | ~ 120 MB | **~ 1.5 - 2 GB** | Raw JSONL text excerpts paired with explicit URL reference nodes. |
 
 ### 2. Compute Load & Time Forecasting
 The computational load of the Multi-Agent LLM is the primary bottleneck for scaling out:
@@ -126,7 +129,7 @@ The computational load of the Multi-Agent LLM is the primary bottleneck for scal
 Relying solely on Vietnamese medical data poses a challenge for achieving 100% coverage without empty nodes. To execute a complete scan of all 15,844 codes successfully, the architecture requires three essential upgrades:
 1. **Proxy Rotation Pool:** Integrating residential proxies to prevent Search Engine IP bans during massive parallel querying.
 2. **Vector Database Caching:** Utilizing ChromaDB or Milvus to cache downloaded web pages, preventing the LLM from redundantly parsing the same articles for closely related sub-diseases.
-3. **Translation Agent Layer:** For extremely rare or tropical diseases lacking Vietnamese literature, the system must autonomously generate English queries for PubMed/WHO, translate the extracted entities back to Vietnamese, and hash them into the graph.
+3. **Translation Agent Layer:** For extremely rare or tropical diseases lacking Vietnamese literature, the system must autonomously generate English queries for PubMed/WHO, translate the extracted entities back to Vietnamese, and hash them into the graph while preserving strict link-traceability to the source domain.
 
 ---
 
@@ -150,7 +153,7 @@ From the central Disease node, the system retrieves symptoms (vomiting, diarrhea
 
 The practical utility of the generated graph structure has been validated across key clinical exploration scenarios:
 * **Disease Suggestion via Symptom Profiling:** When provided with input manifestations such as *diarrhea, vomiting, cramps, and dehydration*, a priority matching algorithm successfully surfaces and ranks Cholera-related codes at the top based on density containment: `A00.9` (81.82%), `A00.0` (75.00%), and `A00` (80.00%).
-* **Evidence-Linked Treatment Retrieval:** Querying a disease node like Cholera (`A00`) yields a structured array of active medications (**Azithromycin**, **Ciprofloxacin**, **Chloramphenicol**, **Doxycycline**, **Erythromycin**, **Zinc**) paired directly with their parsed text segments containing concrete therapeutic dosage constraints and source URLs.
+* **Evidence-Linked Treatment Retrieval:** Querying a disease node like Cholera (`A00`) yields a structured array of active medications (**Azithromycin**, **Ciprofloxacin**, **Chloramphenicol**, **Doxycycline**, **Erythromycin**, **Zinc**) paired directly with their parsed text segments containing concrete therapeutic dosage constraints and explicit source URLs for real-time clinician lookups.
 
 ---
 

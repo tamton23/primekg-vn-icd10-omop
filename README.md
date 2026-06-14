@@ -17,11 +17,11 @@ Using the **ICD-10** coding system from the Vietnamese Ministry of Health as its
 
 The system is built with fault-tolerant principles and rigorous data architecture:
 
-- **Strict Data Provenance & Traceability Layer:** Every node and edge in the network contains explicit metadata linking back to its origin. The system guarantees that no relational link is formed without an accompanying `source_url` and a verbatim text snippet (`evidence`) serving as an unalterable proof of truth.
-- **Hard-Anchoring Architecture:** Unlike random graph generation systems, this platform does **NOT** use LLMs to hallucinate relationship types. Edges are mathematically defined via `RELATION_RULES`, and internal `EXCLUDES`/`INCLUDES` links are extracted directly from the WHO guidance columns in the source ICD-10 file.
-- **Knowledge Hub (Deduplication):** Merges identical Nodes (based on SHA-256 hash), automatically concatenating descriptions and compiling `evidence` streams from multiple independent source URLs into a single, comprehensive knowledge entry without bloating the graph layout.
-- **igraph & Neo4j Compatibility:** Generates continuous `node_index` values, ensuring 100% accurate `x_id`/`y_id` mapping, ready for ingestion into any graph database.
-- **Anti-Crash Mechanism:** Integrates cross-audit features to resume from checkpoints on failed disease extractions. Combines auto-save per cluster and a rotating SearXNG URL algorithm to bypass rate-limiting.
+* **Strict Data Provenance & Traceability Layer:** Every node and edge in the network contains explicit metadata linking back to its origin. The system guarantees that no relational link is formed without an accompanying `source_url` and a verbatim text snippet (`evidence`) serving as an unalterable proof of truth.
+* **Hard-Anchoring Architecture:** Unlike random graph generation systems, this platform does **NOT** use LLMs to hallucinate relationship types. Edges are mathematically defined via `RELATION_RULES`, and internal `EXCLUDES`/`INCLUDES` links are extracted directly from the WHO guidance columns in the source ICD-10 file.
+* **Knowledge Hub (Deduplication):** Merges identical Nodes (based on SHA-256 hash), automatically concatenating descriptions and compiling `evidence` streams from multiple independent source URLs into a single, comprehensive knowledge entry without bloating the graph layout.
+* **igraph & Neo4j Compatibility:** Generates continuous `node_index` values, ensuring 100% accurate `x_id`/`y_id` mapping, ready for ingestion into any graph database.
+* **Anti-Crash Mechanism:** Integrates cross-audit features to resume from checkpoints on failed disease extractions. Combines auto-save per cluster and a rotating SearXNG URL algorithm to bypass rate-limiting.
 
 ---
 
@@ -29,57 +29,54 @@ The system is built with fault-tolerant principles and rigorous data architectur
 
 Web scraping is optimized using `ThreadPoolExecutor` and divided into five tiers of authority. **Notably, the system automatically translates keywords into English** when querying international tiers. 
 
-The overall graph contains **76,415 directed edges**, distributed with precise data lineage and direct link attribution across the following authority tiers:
+The overall graph contains **153,035 directed edges** (including the core ICD-10 framework), distributed with precise data lineage and direct link attribution across the following authority tiers:
 
-1. **Tier 1 (VN Official):** `gov.vn`, `tapchiyhocduphong.vn`, `vjmed.org.vn`, `vjid.vn`, `yhth.vn`, etc.  
-   *Data Contribution:* 36,269 edges (**47.46%** of the graph)
-2. **Tier 2 (VN Major Hospitals & Pharmacies):** `vinmec.com`, `nhathuoclongchau.com.vn`, `medlatec.vn`, `pharmacity.vn`, `tamanhhospital.vn`, `hongngochospital.vn`, etc.  
-   *Data Contribution:* 26,070 edges (**34.12%** of the graph)
-3. **Tier 3 (International Academia - Auto-translated):** `ncbi.nlm.nih.gov`, `thelancet.com`, `jamanetwork.com`, `nejm.org`, `sciencedirect.com`, etc.  
-   *Data Contribution:* 1,342 edges (**1.76%** of the graph)
-4. **Tier 4 (Health Organizations - Auto-translated):** `who.int`, `cdc.gov`, `nih.gov`, `msdmanuals.com`, `mayoclinic.org`, `clevelandclinic.org`, `hopkinsmedicine.org`, `nhs.uk`, etc.  
-   *Data Contribution:* 3,795 edges (**4.97%** of the graph)
-5. **Tier 5 (Extended Sources):** Performs open-search queries if the top 4 tiers do not provide the required number of articles.  
-   *Data Contribution:* 8,939 edges (**11.70%** of the graph)
-
+| Tier | Category | Sources / Description | Edges | Contribution (%) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1** | VN Official | `gov.vn`, `tapchiyhocduphong.vn`, `vjmed.org.vn`, `vjid.vn`, `yhth.vn`, etc. | 74,818 | 48.89% |
+| **Tier 2** | VN Major Hospitals & Pharmacies | `vinmec.com`, `nhathuoclongchau.com.vn`, `medlatec.vn`, `pharmacity.vn`, `tamanhhospital.vn`, `hongngochospital.vn`, etc. | 59,442 | 38.84% |
+| **Tier 3** | International Academia - Auto-translated | `ncbi.nlm.nih.gov`, `thelancet.com`, `jamanetwork.com`, `nejm.org`, `sciencedirect.com`, etc. | 1,681 | 1.10% |
+| **Tier 4** | Health Organizations - Auto-translated | `who.int`, `cdc.gov`, `nih.gov`, `msdmanuals.com`, `mayoclinic.org`, `clevelandclinic.org`, `hopkinsmedicine.org`, `nhs.uk`, etc. | 5,650 | 3.69% |
+| **Tier 5** | Extended Sources | Performs open-search queries if the top 4 tiers do not provide the required number of articles. | 11,444 | 7.48% |
 ---
 
 ## 🤖 Multi-Agent AI Pipeline
 
-Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) operating three independent agents with strict `format: json` enforcement to maintain data integrity:
+Instead of a single bloated prompt, the system utilizes Ollama (Qwen3-VL 8B) operating three independent agents with strict JSON `format` enforcement to maintain data integrity:
 
-1. **Agent Evaluator (Gatekeeper):** Analyzes the first 2,000 characters of the article. **Blocks** pure Veterinary documents (treating pigs, chickens, dogs, cats) with a 96% accuracy filter while remaining intelligent enough to **Allow** articles concerning Zoonotic diseases.
-2. **Agent Extractor (Extraction Engine):** Conducts deep reading of up to 25,000 characters. Extracts 9 types of clinical entities, enforces translation of all data into standardized Vietnamese, and **strictly mandates quoting the exact verbatim sentence from the source document as `evidence` alongside its parent URL.**
-3. **Agent Reviewer (Supervisor):** Re-evaluates the extracted entities, cross-checking the extracted data against the original reference link to purge hallucinations or redundant content before final graph insertion.
+1.  **Agent Evaluator (Gatekeeper):** Analyzes the first 2,000 characters of the article. **Blocks** pure Veterinary documents (treating pigs, chickens, dogs, cats) with a 96% accuracy filter while remaining intelligent enough to **Allow** articles concerning Zoonotic diseases.
+2.  **Agent Extractor (Extraction Engine):** Conducts deep reading of up to 25,000 characters. Extracts 9 types of clinical entities, enforces translation of all data into standardized Vietnamese, and **strictly mandates quoting the exact verbatim sentence from the source document as `evidence` alongside its parent URL.**
+3.  **Agent Reviewer (Supervisor):** Re-evaluates the extracted entities, cross-checking the extracted data against the original reference link to purge hallucinations or redundant content before final graph insertion.
 
 ---
 
 ## 📊 Detailed Data Statistics & Scan Gaps
 
-Data collection currently focuses on ICD-10 codes **A00 through G00.1**. Out of 2,872 codes within this targeted range, **1,219 diseases** have been successfully processed and verified with real web data, representing an effective range coverage of **42.44%** (approximately **7.69%** of the 15,844 total codes in the master catalog).
+Data collection currently focuses on ICD-10 codes **A00 through I89**. Out of 4,145 clinical codes within this targeted range, **2,495 diseases** have been successfully processed and verified with real web data.
 
-> ⚠️ **Dataset Scope & Evaluation Limitation:** Because data collection is currently in a partial scanning phase (restricted to the `A00`–`G00.1` subgroup), a full macro-structural comparison against the complete global baseline dataset or the entire 15,844-code catalog has been intentionally omitted in this release.
+> ⚠️ **Dataset Scope & Evaluation Limitation:** Because data collection is currently in a partial scanning phase (restricted to the A00–I89 subgroup), a full macro-structural comparison against the complete global baseline dataset or the entire 15,844-code catalog has been intentionally omitted in this release.
 
-- **Identified Knowledge Gaps:** 1,653 codes within the scanned range are currently marked as sparse/missing due to technical constraints (such as aggregator resource overload, intermediate timeouts, structural web authentication, or a lack of qualified native-language clinical content). Specific data gaps include: `A37.0`, `A37.8`, `A49.1`, `A51.2`, `A59`, `A77.1`, `A95.0`, `B15`, `B15.0`, `B15.9`, `B18.2`, and the `B20.0` through `B20.8` series.
+* **Identified Knowledge Gaps:** 1,650 codes within the scanned range are currently marked as sparse/missing (a **39.81%** gap rate in the active scanning zone) due to technical constraints such as aggregator resource overload, intermediate timeouts, structural web authentication, or a lack of qualified native-language clinical content. Specific data gaps include: A37.0, B15, B15.0, B15.9, B43, B66.1, B69.1, B83.4, B83.8, B94.2, C22.0, C22.2, C22.7, C22.9, C78.7, D04.7, D13.4, D61.8, D84.0, E03.4.
+* **Total Master Coverage:** The 2,495 successfully mapped diseases represent a **15.75%** coverage progress of the complete 15,844 master catalog.
 
 ### 1. Node Distribution
-The graph is categorized into 9 primary clinical entity types (Total: **32,163 Nodes**):
+The graph is categorized into 9 primary clinical entity types (Total: **53,110 Nodes** including the core ICD-10 framework):
 
 | Entity Type | Concept | Count | Percentage (%) |
 | :--- | :--- | :--- | :--- |
-| **RiskFactor** | Risk Factors | 4,974 | 15.46% |
-| **Symptom** | Clinical Symptoms | 4,832 | 15.02% |
-| **Intervention** | Medical Interventions | 4,618 | 14.36% |
-| **Disease** | Disease (ICD-10) | 4,232 | 13.16% |
-| **Complication** | Complications | 3,894 | 12.11% |
-| **Demographic** | Demographics | 3,474 | 10.80% |
-| **DiagnosticTest** | Tests / Diagnostics | 2,620 | 8.15% |
-| **Pathogen** | Pathogens | 1,861 | 5.79% |
-| **Drug** | Medications | 1,658 | 5.15% |
+| **RiskFactor** | Risk Factors | 8,565 | 16.13% |
+| **Symptom** | Clinical Symptoms | 8,512 | 16.03% |
+| **Intervention** | Medical Interventions | 8,025 | 15.11% |
+| **Complication** | Complications | 6,905 | 13.00% |
+| **Demographic** | Demographics | 6,057 | 11.40% |
+| **Disease** | Disease (ICD-10) | 5,116 | 9.63% |
+| **DiagnosticTest** | Tests / Diagnostics | 4,355 | 8.20% |
+| **Pathogen** | Pathogens | 2,860 | 5.39% |
+| **Drug** | Medications | 2,715 | 5.11% |
 
 ### 2. Graph Density Analysis
-For the 1,219 diseases with real-world data, the graph achieves high connectivity: **60.31 links / Disease**. On average, a single disease code is connected to:  
-`11.0 Symptoms` | `8.6 Complications` | `8.6 Risk Factors` | `8.5 Interventions` | `7.8 Demographics` | `6.1 Diagnostic Tests` | `4.9 Drugs` | `4.3 Pathogens`.
+For the 2,495 diseases successfully mapped with real-world web data, the graph achieves high connectivity: **60.37 links / Disease**. On average, a single disease code is connected to:  
+`11.1 Symptoms` | `8.8 Complications` | `8.7 Risk Factors` | `8.5 Interventions` | `8.0 Demographics` | `6.3 Diagnostic Tests` | `4.7 Drugs` | `3.8 Pathogens`.
 
 ### 3. Semantic Mapping to OMOP CDM for Clinical Querying
 
@@ -104,22 +101,22 @@ By defining this structural correspondence, the KG acts as an automated semantic
 
 ## 🚀 Full-Scale Projection & Scaling Strategy
 
-Based on the empirical baseline established from the initial 2,872 scanned codes, we project the graph's scale, resource requirements, and knowledge gaps if the system is expanded to process the entire **15,844 ICD-10 catalog**.
+Based on the empirical baseline established from the initial 4,145 scanned codes, we project the graph's scale, resource requirements, and knowledge gaps if the system is expanded to process the entire **15,844 ICD-10 catalog**.
 
 ### 1. Projected Graph Scale
 
 | Metric | Current (Tested Range) | Full Projection (15,844 Codes) | Note |
 | :--- | :--- | :--- | :--- |
-| **Successful Diseases** | 1,219 codes | **15,844 codes** | Target 100% coverage of ICD-10 catalog |
-| **Total Edges** | 76,415 edges | **~ 955,000 edges** | Linear growth based on ~60.31 links/disease |
-| **Total Nodes** | 32,163 nodes | **~ 200,000 - 250,000 nodes** | Logarithmic growth due to SHA-256 deduplication |
+| **Successful Diseases** | 2,495 codes | **15,844 codes** | Target 100% coverage of ICD-10 catalog |
+| **Total Edges** | 153,035 edges | **~ 955,000 edges** | Linear growth based on ~60.37 links/disease |
+| **Total Nodes** | 53,110 nodes | **~ 200,000 - 250,000 nodes** | Logarithmic growth due to SHA-256 deduplication |
 | **Database Size** | ~ 15 MB | **~ 180 - 200 MB** | Edges and Nodes CSV structures only |
 | **Evidence Logs** | ~ 120 MB | **~ 1.5 - 2 GB** | Raw JSONL text excerpts with source URLs |
 
 ### 2. Compute Load & Time Forecasting
-- **Single-thread Processing:** ~33 days continuous running (15,844 codes × 3 mins/code)
-- **Multi-threading (8 Workers):** ~4 to 5 days on a dedicated lab server
-- **LLM Token Consumption:** ~158 million input tokens (using Qwen3-VL 8B)
+* **Single-thread Processing:** ~33 days continuous running (15,844 codes × 3 mins/code)
+* **Multi-threading (8 Workers):** ~4 to 5 days on a dedicated lab server
+* **LLM Token Consumption:** ~158 million input tokens (using Qwen3-VL 8B)
 
 ### 3. The Path to 100% Coverage
 To execute a complete scan successfully, the architecture requires:  
@@ -157,7 +154,7 @@ The practical utility of the graph has been validated across key clinical explor
 MATCH (disease:Entity)-[L:INKS_TO]->(s:Entity)
 WHERE toLower(s.name) CONTAINS 'tiêu chảy'
     OR toLower(s.name) CONTAINS 'nôn'
-    OR toLower(s.name) CONTAINS 'chuyết rút'
+    OR toLower(s.name) CONTAINS 'chuột rút'
     OR toLower(s.name) CONTAINS 'mất nước'
 
 // 2. Count how many symptoms match the user's input for each disease
